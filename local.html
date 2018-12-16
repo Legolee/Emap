@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>专题图</title>
+    <link rel="stylesheet" href="infowindow.css"/>
+    <style>
+        html,
+        body,
+        #container {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+       /* .content-window-card {
+            position: relative;
+            box-shadow: none;
+            bottom: 0;
+            left: 0;
+            width: auto;
+            padding: 0;
+        }
+
+        .content-window-card p {
+            height: 2rem;
+        }
+
+        .custom-info {
+            border: solid 1px silver;
+        }
+
+        div.info-top {
+            position: relative;
+            background: none repeat scroll 0 0 #F9F9F9;
+            border-bottom: 1px solid #CCC;
+            border-radius: 5px 5px 0 0;
+        }
+
+        div.info-top div {
+            display: inline-block;
+            color: #333333;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 31px;
+            padding: 0 10px;
+        }
+
+        div.info-top img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition-duration: 0.25s;
+        }
+
+        div.info-top img:hover {
+            box-shadow: 0px 0px 5px #000;
+        }
+
+        div.info-middle {
+            font-size: 12px;
+            padding: 10px 6px;
+            line-height: 20px;
+        }
+
+        div.info-bottom {
+            height: 0px;
+            width: 100%;
+            clear: both;
+            text-align: center;
+        }
+
+        div.info-bottom img {
+            position: relative;
+            z-index: 104;
+        }
+
+        span {
+            margin-left: 5px;
+            font-size: 11px;
+        }
+
+        .info-middle img {
+            float: left;
+            margin-right: 6px;
+        }*/
+    </style>
+</head>
+<body>
+<div id="container" class="container">
+</div>
+<!--<script src="./script/loca.js"></script>-->
+<script src="https://webapi.amap.com/loca?v=1.2.0&key=8dcc840c1b491924f1bd17dc2c85752a"></script>
+<!--引入UI组件库（1.0版本） -->
+<script src="https://webapi.amap.com/ui/1.0/main.js"></script>
+<script type="text/javascript" language="javascript" src="js/demo.js"></script>
+<script src="https://a.amap.com/Loca/static/dist/jquery.min.js"></script>
+<script src="https://a.amap.com/Loca/static/mock/districts.js"></script>
+<script>
+    var map = Loca.create('container', {
+        mapStyle: 'amap://styles/whitesmoke',
+        zoom: 13,
+        center: [118.796623,32.059352],
+        features: ['bg', 'road'],
+        // Loca 自 1.2.0 起 viewMode 模式默认为 3D，如需 2D 模式，请显示配置。
+        // viewMode: '3D'
+    });
+    map.on('mapload', function () {
+            map.getMap().plugin(['AMap.ControlBar'], function () {
+                var toolBar = new AMap.ControlBar();
+                map.getMap().addControl(toolBar);
+            });
+        });
+        
+    map.on('mapload', function () {
+            map.getMap().plugin(['AMap.Scale'], function () {
+                var scale = new AMap.Scale();
+                map.getMap().addControl(scale);
+            });
+        });
+
+    var layer = Loca.visualLayer({
+        eventSupport: true,    // selectStyle 配置需要开启 eventSupport: true
+        container: map,
+        type: 'point',
+        shape: 'image'
+    });
+
+    layer.on('mousemove', function (ev) {
+        // 事件类型
+        var type = ev.type;
+        // 当前元素的原始数据
+        var rawData = ev.rawData;
+        // 原始鼠标事件
+        var originalEvent = ev.originalEvent;
+
+        openInfoWin(map.getMap(), originalEvent, {
+            '名称': rawData.name,
+            '位置': rawData.center,
+            '简介': rawData.introduce
+        });
+    });
+    layer.on('mouseleave', function (ev) {
+        closeInfoWin();
+    });
+
+    var data = [
+    { 'name': '玄武门', 'center': '118.787212,32.070545','introduce':'玄武门是南京明城墙的后开城门，开辟于1908年，原名丰润门，位于神策门和解放门、太平门之间，因靠近玄武湖而得名，作为玄武湖公园的西门。' },
+    { 'name': '中华门', 'center': '118.781807,32.012776','introduce':'中华门是南京明城墙的十三座明代京城城门之一，原名聚宝门，是中国现存规模最大的城门，也是世界上保存最完好、结构最复杂的堡垒瓮城，其建筑规模仅次于通济门（现已不存），有“天下第一瓮城”之称。中华门布局严整、构造独特，是研究中国古代军事设施的重要实物资料，不论是在军事上、历史上、还是在文化上、城建史上，都占有重要的地位。'},
+    { 'name': '集庆门', 'center': '118.772346,32.018776','introduce':'集庆门是南京明城墙的后开城门，开辟于1991年，位于南京市秦淮区明城墙西南段、水西门以南、集庆门大街东端护城河东侧。集庆门座东朝西，是南京城墙在建国后开的第二个城门。' },
+    { 'name': '江东门', 'center': '118.742094,32.035982','introduce':'江东门，是南京明城墙中外郭城的十八座城门之一，位于今南京市建邺区，因城门临近长江以东而得名。江东门东往水西门，西通上新河，有河道径流流入长江；自明代以来，一直是南京城外西南部商业和交通中心，粮食、木材的主要集散地。' }
+];
+    layer.setData(data, {
+        // 指定经纬度所在字段
+        type: 'json',
+        lnglat: 'center'
+
+    });
+   layer.setOptions({
+        source: function (res) {
+            return 'symbols/tempo.png';
+        },
+        style: {
+            size: 22
+        }
+    });
+    layer.render();
+
+</script>
+</body>
+</html>
